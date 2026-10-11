@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <link rel="icon" href="data:," />
+  <title>Logo Interpreter</title>
+  <style>
+    :root{
+      --ink:#17324d;--muted:#587084;--paper:#fffdf7;--panel:#fff;--green:#0c8f73;
+      --green-dark:#076a57;--yellow:#ffd75a;--sky:#dff5fb;--coral:#f26f55;
+      --line:#d6e3e8;--shadow:0 10px 28px rgba(23,50,77,.10)
+    }
+    *{box-sizing:border-box}
+    html{background:#eaf7f3}
+    body{margin:0;color:var(--ink);background:#eef9f5;font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;min-height:100vh}
+    button,textarea,input{font:inherit}button{touch-action:manipulation}
+    .app{width:min(1180px,100%);margin:0 auto;padding:24px 22px 40px}
+    .intro{display:flex;align-items:end;justify-content:space-between;gap:24px;margin:4px 0 20px}
+    h1{font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;font-size:clamp(2rem,4vw,3.25rem);line-height:.98;letter-spacing:-.035em;margin:0;max-width:620px}
+    .intro p{margin:0;max-width:480px;color:var(--muted);font-size:1.05rem;line-height:1.45}
+    .workspace{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(310px,.75fr);gap:18px;align-items:start}
+    .card{background:var(--panel);box-shadow:var(--shadow);border:1px solid rgba(23,50,77,.08)}
+    .stage-card{padding:12px;border-radius:26px;contain:layout paint}
+    .stage-wrap{position:relative;overflow:hidden;border-radius:18px;background:#fffaf0;min-height:430px;contain:paint}
+    #stage{display:block;width:100%;height:clamp(430px,56vh,650px);touch-action:none}
+    .stage-label{position:absolute;top:14px;left:14px;background:rgba(255,255,255,.96);padding:7px 11px;border-radius:999px;font-weight:700;font-size:.9rem;color:var(--muted);box-shadow:0 3px 12px rgba(23,50,77,.08);pointer-events:none}
+    .side{display:grid;gap:14px}.lesson{border-radius:22px;padding:18px}
+    .lesson-top{display:flex;justify-content:space-between;align-items:center;gap:14px}.step-count{font-weight:800;color:var(--green-dark);font-size:.9rem}
+    .dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.dot{width:9px;height:9px;border-radius:50%;background:#dce7e9}.dot.on{background:var(--green)}
+    h2{font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;font-size:1.45rem;margin:10px 0 5px;line-height:1.15}.goal{margin:0;color:var(--muted);line-height:1.4;min-height:44px}
+    .hint{margin:12px 0 0;background:var(--sky);padding:10px 12px;border-radius:12px;color:#285367;font-size:.94rem;line-height:1.35}
+    .code-card{border-radius:22px;overflow:hidden}.code-head{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-bottom:1px solid var(--line);gap:10px}
+    .code-head strong{font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif}.tiny{color:var(--muted);font-size:.84rem}
+    textarea{display:block;width:100%;height:246px;border:0;resize:vertical;padding:16px;background:#132d40;color:#f5fbff;font:700 1rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;outline:none;tab-size:2}
+    textarea:focus{box-shadow:inset 0 0 0 3px var(--yellow)}
+    .actions{padding:12px;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:9px}.btn{border:0;border-radius:13px;padding:12px 14px;min-height:48px;font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;font-weight:900;cursor:pointer;transition:transform .12s,background .12s}
+    .btn:active{transform:translateY(1px)}.run{background:var(--green);color:#fff}.run:hover{background:var(--green-dark)}.stop{background:#ffe6df;color:#9b3f2d}.clear{background:#edf3f5;color:var(--ink)}
+    .status{margin:0 12px 12px;padding:10px 12px;border-radius:10px;background:#eef8f4;color:var(--green-dark);font-weight:700;font-size:.92rem;min-height:40px}.status.error{background:#fff0ec;color:#a63b27}
+    .output-wrap{border-top:1px solid var(--line);background:#f7fafb}.output-head{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 4px;color:var(--muted);font-size:.82rem;font-weight:700}
+    .output-head button{border:0;background:transparent;color:var(--green-dark);font-weight:700;cursor:pointer;padding:4px 6px}.output{margin:0;padding:4px 14px 12px;min-height:34px;max-height:112px;overflow:auto;white-space:pre-wrap;color:#27455e;font:700 .88rem/1.45 ui-monospace,SFMono-Regular,Consolas,monospace}
+    .lesson-nav{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}.navbtn{background:#edf5f3;color:var(--ink)}.navbtn:last-child{background:var(--yellow)}.navbtn:disabled{opacity:.4;cursor:not-allowed}
+    details.cheat{grid-column:1/-1;border-radius:22px;padding:0;overflow:hidden;margin-top:4px}summary{list-style:none;cursor:pointer;padding:17px 20px;font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;font-weight:900;font-size:1.1rem;display:flex;align-items:center;justify-content:space-between}
+    summary::-webkit-details-marker{display:none}summary::after{content:"+";font-size:1.5rem;color:var(--green)}details[open] summary::after{content:"−"}
+    .commands{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+    .command{background:#fff;padding:14px 16px;min-height:78px}.command code{display:block;color:var(--green-dark);font-weight:900;font-size:.95rem;margin-bottom:4px;overflow-wrap:anywhere}.command span{color:var(--muted);font-size:.89rem;line-height:1.35;display:block}
+    .group-title{grid-column:1/-1;background:#f0f8f5;padding:11px 16px;font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;font-weight:900;color:var(--ink)}.example{grid-column:span 2;background:#fff9e8}
+    .reference{grid-column:1/-1;background:#fff;padding:13px 16px;color:var(--muted);font-size:.9rem}.reference a{color:var(--green-dark);font-weight:700}
+    .kbd{font-family:ui-monospace,monospace;background:#eaf2f4;padding:1px 5px;border-radius:5px;color:var(--ink)}
+    @media(max-width:820px){
+      .app{padding:18px 14px 28px}.intro{align-items:start;flex-direction:column;gap:8px;margin-bottom:14px}.intro p{font-size:.98rem}.workspace{grid-template-columns:1fr}.stage-wrap{min-height:0}#stage{height:58vw;min-height:300px;max-height:430px}.side{grid-template-columns:1fr 1fr}.lesson,.code-card{min-width:0}details.cheat{grid-column:1/-1}.commands{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:610px){
+      h1{font-size:2.35rem}.side{grid-template-columns:1fr}.stage-card{padding:8px;border-radius:20px}.stage-wrap{border-radius:14px}#stage{height:68vw;min-height:260px}.lesson,.code-card{border-radius:18px}.actions{grid-template-columns:1.4fr 1fr 1fr;gap:7px}.btn{padding:10px 8px;min-height:46px}.commands{grid-template-columns:1fr 1fr}.command{padding:12px;min-height:74px}.example{grid-column:span 2}textarea{height:270px}
+    }
+    @media(max-width:390px){.app{padding-inline:10px}.actions{grid-template-columns:1fr 1fr}.run{grid-column:span 2}.stage-label{top:10px;left:10px}.commands{grid-template-columns:1fr}.example{grid-column:span 1}}
+    @media(prefers-reduced-motion:reduce){.btn{transition:none}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="intro">
+      <h1>Tell the turtle<br>where to go.</h1>
+      <p>Write real Logo programs with procedures, variables, lists, math, color, and control structures. Press <strong>Run</strong> to bring each idea to life.</p>
+    </section>
+
+    <section class="workspace" aria-label="Turtle drawing workspace">
+      <div class="card stage-card">
+        <div class="stage-wrap">
+          <canvas id="stage" aria-label="Drawing made by the Logo turtle"></canvas>
+          <span class="stage-label">Turtle canvas</span>
+        </div>
+      </div>
+
+      <div class="side">
+        <section class="card lesson" aria-live="polite">
+          <div class="lesson-top"><span class="step-count" id="stepCount"></span><div class="dots" id="dots"></div></div>
+          <h2 id="lessonTitle"></h2><p class="goal" id="lessonGoal"></p><p class="hint" id="lessonHint"></p>
+          <div class="lesson-nav"><button class="btn navbtn" id="prevLesson">← Back</button><button class="btn navbtn" id="nextLesson">Next →</button></div>
+        </section>
+
+        <section class="card code-card">
+          <div class="code-head"><strong>Your program</strong><span class="tiny"><span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to run</span></div>
+          <label for="code" class="tiny" style="position:absolute;left:-9999px">Logo program</label>
+          <textarea id="code" aria-label="Logo program" spellcheck="false" autocapitalize="off"></textarea>
+          <div class="actions"><button class="btn run" id="run">▶ Run</button><button class="btn stop" id="stop">■ Stop</button><button class="btn clear" id="clear">↺ Clear</button></div>
+          <p class="status" id="status" role="status">Ready when you are!</p>
+          <div class="output-wrap"><div class="output-head"><span>Logo output</span><button id="clearOutput" type="button">Clear output</button></div><pre class="output" id="output" aria-live="polite">PRINT and SHOW results appear here.</pre></div>
+        </section>
+      </div>
+
+      <details class="card cheat">
+        <summary>Terrapin-style command guide</summary>
+        <div class="commands">
+          <div class="group-title">Move and draw</div>
+          <div class="command"><code>FD 100 · BK 50</code><span>FORWARD / BACK. Move in turtle steps.</span></div>
+          <div class="command"><code>RT 90 · LT 90</code><span>RIGHT / LEFT. Turn in degrees.</span></div>
+          <div class="command"><code>SETXY [40 80]</code><span>Also SETX, SETY, SETH / SETHEADING, HOME.</span></div>
+          <div class="command"><code>PU · PD · HT · ST</code><span>PENUP, PENDOWN, HIDETURTLE, SHOWTURTLE.</span></div>
+          <div class="command"><code>SETPC "BLUE</code><span>Set pen color by Logo color number, name, or [R G B].</span></div>
+          <div class="command"><code>SETWIDTH 5</code><span>Also SETW, SETBG, SETOPACITY, PENERASE, PENREVERSE.</span></div>
+          <div class="command"><code>ARC 180 60</code><span>Draw an arc. DOT, FILL, STAMPOVAL, STAMPRECT and TURTLETEXT also work.</span></div>
+          <div class="command"><code>CS · CLEAN · DRAW</code><span>Clear and home, clear only, or reset the whole drawing.</span></div>
+
+          <div class="group-title">Repeat, decide, and wait</div>
+          <div class="command example"><code>REPEAT 4 [ FD 80 RT 90 ]</code><span>REPCOUNT and REPTOTAL are available inside a repeat.</span></div>
+          <div class="command example"><code>IF :SIZE &gt; 50 [ SETPC "RED ]</code><span>Also IFELSE, TEST with IFT / IFF, RUN, STOP and OUTPUT.</span></div>
+          <div class="command"><code>FOR [I 1 8] [ PRINT :I ]</code><span>Count through a range; add a fourth value for the step.</span></div>
+          <div class="command"><code>WHILE [ :N &gt; 0 ] [ ... ]</code><span>Also UNTIL, DO.WHILE, DO.UNTIL and FOREACH.</span></div>
+          <div class="command"><code>WAIT 250</code><span>Pause for milliseconds. SETSPEED changes turtle animation speed.</span></div>
+          <div class="command"><code>SAY [HELLO VED]</code><span>Speak through the browser after Run is pressed.</span></div>
+
+          <div class="group-title">Procedures and variables</div>
+          <div class="command example"><code>TO SQUARE :SIZE<br>REPEAT 4 [FD :SIZE RT 90]<br>END</code><span>Create a command with an input. Procedures can call themselves and other procedures.</span></div>
+          <div class="command"><code>MAKE "SIZE 80</code><span>Assign a global value; read it with <strong>:SIZE</strong> or THING "SIZE.</span></div>
+          <div class="command"><code>LOCAL "X · LMAKE "X 5</code><span>Create local variables inside a procedure.</span></div>
+          <div class="command"><code>OUTPUT :ANSWER</code><span>Return a value from a reporter procedure. OP is accepted.</span></div>
+
+          <div class="group-title">Words, lists, math, and logic</div>
+          <div class="command"><code>FIRST · LAST · ITEM</code><span>Access data. Also BF / BUTFIRST, BL / BUTLAST, COUNT and PICK.</span></div>
+          <div class="command"><code>LIST · SE · WORD</code><span>Build data. Also FPUT, LPUT, SENTENCE, ISEQ, RSEQ, REVERSE and REMOVE.</span></div>
+          <div class="command"><code>SUM · DIFFERENCE</code><span>Also PRODUCT, QUOTIENT, REMAINDER, MODULO, POWER, SQRT, ABS, INT and ROUND.</span></div>
+          <div class="command"><code>SIN · COS · TAN · PI</code><span>Degree trig plus ASIN, ACOS, ATAN, radians, logs, and random numbers.</span></div>
+          <div class="command"><code>= · &lt;&gt; · &lt; · &gt; · &lt;= · &gt;=</code><span>Comparisons; AND, OR and NOT combine true/false values.</span></div>
+          <div class="command"><code>EMPTY? · MEMBER? · NUMBER?</code><span>Also WORD?, LIST?, NAME?, DEFINED? and PENDOWN?.</span></div>
+
+          <div class="group-title">Position reports and browser-safe I/O</div>
+          <div class="command"><code>POS · XCOR · YCOR</code><span>Also GETXY, GETX, GETY, HEADING, TOWARDS and DISTANCE.</span></div>
+          <div class="command"><code>PRINT · SHOW · TYPE</code><span>Send values to Logo output; CLEARTEXT clears it.</span></div>
+          <div class="command"><code>DATE · TIME · MILLISECONDS</code><span>Browser-safe workspace reporters; CHAR and UNICODE work too.</span></div>
+          <div class="command"><code>WRAP · FENCE · WINDOW</code><span>Choose how the turtle behaves at the canvas edge. GRIDON and GRIDOFF toggle the grid.</span></div>
+          <div class="reference">This browser interpreter follows Terrapin’s command names and abbreviations for classroom graphics and language work. Hardware robots, desktop menus, files, external widgets, and multi-window features require Terrapin Logo itself. See Terrapin’s <a href="https://resources.terrapinlogo.com/weblogo/learning_center/" target="_blank" rel="noopener">Learning Center</a> and <a href="https://resources.terrapinlogo.com/weblogo/commands/index" target="_blank" rel="noopener">complete command reference</a>.</div>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <script>
+  (()=>{
+    'use strict';
+    const canvas=document.getElementById('stage'),ctx=canvas.getContext('2d',{alpha:false});
+    const code=document.getElementById('code'),statusEl=document.getElementById('status'),outputEl=document.getElementById('output');
+    let width=0,height=0,dpr=1,runToken=0,callDepth=0,stepCount=0,lessonIndex=0;
+    let scene=[],currentStroke=null,background='#fffaf0',gridVisible=true,boundaryMode='window';
+    let framePending=false,dirty=true,tween=null,frameWaiters=[];
+    let turtle=freshTurtle(),procedures=new Map(),globals=new Map(),startedAt=performance.now();
+
+    const lessons=[
+      {title:'Mission 1: Make a line',goal:'Move the turtle straight ahead. Change 120 to make the line longer or shorter.',hint:'FD is short for FORWARD.',code:'FD 120'},
+      {title:'Mission 2: Draw a square',goal:'Use REPEAT to make four equal sides and four right turns.',hint:'REPCOUNT tells you which trip through REPEAT is running.',code:'REPEAT 4 [\n  FD 100\n  RT 90\n]'},
+      {title:'Mission 3: Colorful star',goal:'Change the pen color and width, then draw a five-point star.',hint:'Try another color name such as "ORANGE or "PURPLE.',code:'SETPC "BLUE\nSETWIDTH 5\nREPEAT 5 [\n  FD 150\n  RT 144\n]'},
+      {title:'Mission 4: Make a procedure',goal:'Teach Logo a new command named POLYGON and give it two inputs.',hint:'Inputs begin with a colon when you use them.',code:'TO POLYGON :SIDES :SIZE\n  REPEAT :SIDES [\n    FD :SIZE\n    RT 360 / :SIDES\n  ]\nEND\n\nPOLYGON 6 70'},
+      {title:'Mission 5: Use a variable',goal:'Store a size, test it, and use it in a drawing.',hint:'MAKE stores a value. Read it later with :SIZE.',code:'MAKE "SIZE 85\nIF :SIZE > 60 [ SETPC "CORAL ]\nREPEAT 3 [ FD :SIZE RT 120 ]'},
+      {title:'Mission 6: Flower with lists',goal:'Use FOREACH to draw petals in several colors.',hint:'The question mark is the current item in FOREACH.',code:'FOREACH [RED ORANGE PURPLE BLUE] [\n  SETPC ?\n  REPEAT 2 [ ARC 60 45 RT 180 ]\n  RT 90\n]'},
+      {title:'Mission 7: Recursive spiral',goal:'A procedure can call itself with a smaller input.',hint:'STOP ends the procedure when the size gets too small.',code:'TO SPIRAL :SIZE\n  IF :SIZE < 5 [ STOP ]\n  FD :SIZE\n  RT 91\n  SPIRAL :SIZE - 2\nEND\n\nSPIRAL 110'},
+      {title:'Mission 8: Ferris wheel',goal:'Build a Ferris wheel from reusable RIM, CABIN, and WHEEL procedures.',hint:'WHEEL calls CABIN once at the end of each spoke.',code:'TO RIM :R\n  REPEAT 72 [ FD PI * :R / 36 LT 5 ]\nEND\n\nTO CABIN :S\n  REPEAT 4 [ FD :S RT 90 ]\nEND\n\nTO WHEEL :R :SPOKES\n  PU SETY 0 - :R SETH 90 PD\n  RIM :R\n  PU HOME SETH 0 PD\n  REPEAT :SPOKES [\n    FD :R\n    CABIN 18\n    BK :R\n    RT 360 / :SPOKES\n  ]\nEND\n\nSETPC "TEAL\nSETWIDTH 3\nWHEEL 105 12'},
+      {title:'Mission 9: Windmill',goal:'Build a windmill: a stand, a round hub, and 4 blades. Each blade has a thin rectangular handle from the hub, a rectangle sail, and grid lines inside the sail. Teach the turtle a new trick called BLADE, then use it 4 times.',hint:'RT 45 aims the turtle at the first corner. Each RT 90 spins it to the next blade.',code:'CS\nPU BK 46 PD\nBK 90\nRT 90 FD 70 BK 140 FD 70\nPU HOME\nRT 90 BK 46 LT 90\nPD\nREPEAT 36 [ FD 8 RT 10 ]\nPU RT 90 FD 46 LT 90 PD\nTO BLADE\n  REPEAT 2 [ FD 50 RT 90 FD 10 RT 90 ]\n  PU FD 50 PD\n  REPEAT 2 [ FD 70 RT 90 FD 40 RT 90 ]\n  REPEAT 6 [ FD 10 RT 90 FD 40 BK 40 LT 90 ]\n  FD 10\n  REPEAT 3 [ RT 90 FD 10 LT 90 BK 70 FD 70 ]\n  PU LT 90 FD 30 RT 90 BK 120 PD\nEND\nRT 45\nBLADE RT 90 BLADE RT 90 BLADE RT 90 BLADE'},
+      {title:'Bonus: Write on the canvas',goal:'Place colorful text beside a stamped shape.',hint:'TURTLETEXT draws a word or list without moving the turtle.',code:'SETPC "GREEN\n(STAMPOVAL 90 90 "TRUE)\nPU SETXY [-70 -80] PD\nSETPC "NAVY\nTURTLETEXT [GREAT WORK VED!]'}
+    ];
+
+    const COLORS={
+      0:'#000000',1:'#0057b8',2:'#16a34a',3:'#00a7a7',4:'#dc2626',5:'#a855f7',6:'#a16207',7:'#d1d5db',8:'#6b7280',9:'#60a5fa',10:'#22c55e',11:'#22d3ee',12:'#fb7185',13:'#e879f9',14:'#facc15',15:'#ffffff',
+      BLACK:'#000000',BLUE:'#2563eb',GREEN:'#159947',CYAN:'#06b6d4',RED:'#dc2626',MAGENTA:'#c026d3',BROWN:'#92400e',GRAY:'#6b7280',GREY:'#6b7280',LIGHTBLUE:'#60a5fa',LIME:'#84cc16',AQUA:'#22d3ee',CORAL:'#f26f55',PURPLE:'#8b5cf6',YELLOW:'#facc15',WHITE:'#ffffff',ORANGE:'#f97316',PINK:'#ec4899',TEAL:'#0d9488',NAVY:'#17324d',SILVER:'#94a3b8',GOLD:'#eab308'
+    };
+    const ALIAS={FD:'FORWARD',BK:'BACK',RT:'RIGHT',LT:'LEFT',PU:'PENUP',PD:'PENDOWN',HT:'HIDETURTLE',ST:'SHOWTURTLE',CS:'CLEARSCREEN',SETH:'SETHEADING',SETW:'SETWIDTH',SETXY:'SETXY',POS:'GETXY',XCOR:'GETX',YCOR:'GETY',BG:'BACKGROUND',PC:'PENCOLOR',PR:'PRINT',OP:'OUTPUT',IFT:'IFTRUE',IFF:'IFFALSE',BF:'BUTFIRST',BL:'BUTLAST',BM:'BUTMEMBER',REMOVE:'BUTMEMBER',FM:'FROMMEMBER',SE:'SENTENCE',EMPTYP:'EMPTY?',MEMBERP:'MEMBER?',NUMBERP:'NUMBER?',WORDP:'WORD?',LISTP:'LIST?',NAMEP:'NAME?',DEFINEDP:'DEFINED?',PENDOWNP:'PENDOWN?',SHOWNP:'SHOWN?',ARRAYP:'ARRAY?',ACOS:'ARCCOS',ASIN:'ARCSIN',ATAN:'ARCTAN',LN:'LOG',EXP:'EXPN',LOCALMAKE:'LMAKE',SETPC:'SETPC',TT:'TURTLETEXT'};
+    const reporterArity={
+      SUM:2,DIFFERENCE:2,PRODUCT:2,QUOTIENT:2,REMAINDER:2,MODULO:2,POWER:2,RANDOM:1,ABS:1,INT:1,ROUND:1,SQRT:1,MINUS:1,
+      SIN:1,COS:1,TAN:1,ARCSIN:1,ARCCOS:1,ARCTAN:1,RADSIN:1,RADCOS:1,RADARCTAN:1,LOG:1,LOG10:1,EXPN:1,
+      AND:2,OR:2,NOT:1,LOGAND:2,LOGOR:2,LOGXOR:2,LOGNOT:1,LSH:2,LSHIFT:2,
+      FIRST:1,LAST:1,BUTFIRST:1,BUTLAST:1,COUNT:1,ITEM:2,PICK:1,'EMPTY?':1,'MEMBER?':2,'NUMBER?':1,'WORD?':1,'LIST?':1,'NAME?':1,'DEFINED?':1,
+      FPUT:2,LPUT:2,LIST:2,SENTENCE:2,WORD:2,BUTMEMBER:2,FROMMEMBER:2,LOWERCASE:1,UPPERCASE:1,MIXEDCASE:1,REVERSE:1,ISEQ:2,RSEQ:3,THING:1,QUOTE:1,CHAR:1,UNICODE:1,
+      TOWARDS:1,DISTANCE:1,COLOR:1,COLORNAME:1,FORM:2
+    };
+
+    class Env{
+      constructor(parent=null){this.parent=parent;this.values=new Map();this.repcount=0;this.reptotal=0;this.test=false}
+      hasOwn(n){return this.values.has(n.toUpperCase())}
+      find(n){const k=n.toUpperCase();return this.values.has(k)?this:(this.parent?this.parent.find(k):null)}
+      get(n){const e=this.find(n);if(!e)throw new Error('I don’t know the value of '+n+'.');return e.values.get(n.toUpperCase())}
+      set(n,v,local=false){const k=n.toUpperCase();if(local){this.values.set(k,v);return}const e=this.find(k);(e||globalEnv()).values.set(k,v)}
+    }
+    class StopSignal extends Error{} class OutputSignal extends Error{constructor(value){super();this.value=value}}
+    class LogoList{constructor(tokens=[]){this.tokens=tokens}}
+    function globalEnv(){if(!globals.__env){globals.__env=new Env();globals.__env.values=globals}return globals.__env}
+    function freshTurtle(){return{x:0,y:0,heading:0,pen:true,visible:true,color:'#176b86',width:4,opacity:1,mode:'paint',speed:1,size:1,font:'700 18px system-ui, sans-serif'} }
+    function canon(s){const u=String(s).toUpperCase();return ALIAS[u]||u}
+    function num(v,label='a number'){const n=Number(v);if(!Number.isFinite(n))throw new Error('I expected '+label+', but got '+display(v)+'.');if(Math.abs(n)>1e7)throw new Error('That number is too large for this canvas.');return n}
+    function truth(v){if(typeof v==='boolean')return v;if(typeof v==='number')return v!==0;const s=String(v).toUpperCase();return !(s===''||s==='FALSE'||s==='0')}
+    function display(v,show=false){if(v instanceof LogoList)return '['+dataFromList(v,null).map(x=>display(x,show)).join(' ')+']';if(Array.isArray(v))return '['+v.map(x=>display(x,show)).join(' ')+']';if(typeof v==='boolean')return v?'TRUE':'FALSE';return String(v)}
+    function colorOf(v){if(v instanceof LogoList)v=dataFromList(v,null);if(Array.isArray(v)){const [r=0,g=0,b=0]=v.map(Number);return `rgb(${clamp(r,0,255)},${clamp(g,0,255)},${clamp(b,0,255)})`}const key=String(v).replace(/^"/,'').toUpperCase();return COLORS[key]||COLORS[Number(key)]||String(v)}
+    const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+
+    function lex(src){
+      src=src.replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/;.*$/gm,' ');
+      return src.match(/<=|>=|<>|!=|\[|\]|\(|\)|\+|-|\*|\/|%|=|<|>|"[^\s\[\]\(\)]+|:[^\s\[\]\(\)]+|[^\s\[\]\(\)+\-*\/%=<>]+/g)||[];
+    }
+    function extractProcedures(src){
+      procedures=new Map();const main=[],lines=src.replace(/[“”]/g,'"').split(/\r?\n/);
+      for(let i=0;i<lines.length;i++){
+        const clean=lines[i].replace(/;.*$/,'').trim();const m=clean.match(/^TO\s+([^\s]+)(.*)$/i);
+        if(!m){main.push(lines[i]);continue}
+        const name=canon(m[1]),inputs=lex(m[2]).filter(t=>t.startsWith(':')).map(t=>t.slice(1).toUpperCase()),body=[];let found=false;
+        for(i=i+1;i<lines.length;i++){const row=lines[i].replace(/;.*$/,'').trim();if(/^END\s*$/i.test(row)){found=true;break}body.push(lines[i])}
+        if(!found)throw new Error('Procedure '+name+' is missing END.');procedures.set(name,{name,inputs,tokens:lex(body.join('\n'))});
+      }
+      return lex(main.join('\n'));
+    }
+    function takeList(tokens,state){
+      if(tokens[state.i]!=='[')throw new Error('I expected a list in [ square brackets ].');state.i++;let depth=1,out=[];
+      while(state.i<tokens.length&&depth){const t=tokens[state.i++];if(t==='[')depth++;else if(t===']')depth--;if(depth)out.push(t)}
+      if(depth)throw new Error('A list is missing its closing ].');return new LogoList(out)
+    }
+    function dataFromList(list,env){
+      const t=list instanceof LogoList?list.tokens:list;const out=[];
+      for(let i=0;i<t.length;i++){const x=t[i];if(x==='['){let d=1,j=i+1;for(;j<t.length&&d;j++){if(t[j]==='[')d++;if(t[j]===']')d--}out.push(dataFromList(new LogoList(t.slice(i+1,j-1)),env));i=j-1}else if(/^[-+]?\d*\.?\d+(e[-+]?\d+)?$/i.test(x))out.push(Number(x));else if(x.startsWith(':')&&env){try{out.push(env.get(x.slice(1)))}catch{out.push(x)}}else out.push(x.replace(/^"/,''))}
+      return out
+    }
+
+    async function evalExpr(tokens,state,env,minPrec=0,token=runToken){
+      let left=await evalAtom(tokens,state,env,token);
+      const prec={'OR':1,'AND':2,'=':3,'<>':3,'!=':3,'<':3,'>':3,'<=':3,'>=':3,'+':4,'-':4,'*':5,'/':5,'%':5};
+      while(state.i<tokens.length){const op=String(tokens[state.i]).toUpperCase(),p=prec[op];if(!p||p<minPrec)break;state.i++;const right=await evalExpr(tokens,state,env,p+1,token);left=applyOperator(op,left,right)}
+      return left
+    }
+    async function evalAtom(tokens,state,env,token){
+      if(state.i>=tokens.length)throw new Error('I expected another input.');let t=tokens[state.i++];
+      if(t==='('){const val=await evalExpr(tokens,state,env,0,token);if(tokens[state.i]===')')state.i++;return val}
+      if(t==='['){state.i--;return takeList(tokens,state)}
+      if(t==='+'||t==='-'){const v=num(await evalAtom(tokens,state,env,token));return t==='-'?-v:v}
+      if(/^[-+]?\d*\.?\d+(e[-+]?\d+)?$/i.test(t))return Number(t);
+      if(t.startsWith('"'))return t.slice(1);
+      if(t.startsWith(':'))return env.get(t.slice(1));
+      const c=canon(t);if(c==='TRUE')return true;if(c==='FALSE')return false;if(c==='PI')return Math.PI;if(c==='REPCOUNT')return env.repcount||0;if(c==='REPTOTAL')return env.reptotal||0;
+      if(['GETX','GETY','GETXY','HEADING','PENCOLOR','BACKGROUND','WIDTH','PEN','PENDOWN?','SHOWN?','OPACITY','SPEED','STEPSIZE','TURTLESIZE','DATE','TIME','MILLISECONDS','COLORS','BOUNDS'].includes(c))return zeroReporter(c);
+      if(reporterArity[c]!=null){const args=[];for(let i=0;i<reporterArity[c];i++)args.push(await evalExpr(tokens,state,env,0,token));return evalReporter(c,args,env)}
+      if(procedures.has(c)){const p=procedures.get(c),args=[];for(let i=0;i<p.inputs.length;i++)args.push(await evalExpr(tokens,state,env,0,token));return callProcedure(p,args,env,token,true)}
+      if(c==='?')return env.get('?');
+      return t;
+    }
+    function applyOperator(op,a,b){switch(op){case'+':return num(a)+num(b);case'-':return num(a)-num(b);case'*':return num(a)*num(b);case'/':if(num(b)===0)throw new Error('Division by zero is not allowed.');return num(a)/num(b);case'%':return num(a)%num(b);case'=':return equal(a,b);case'<>':case'!=':return !equal(a,b);case'<':return a<b;case'>':return a>b;case'<=':return a<=b;case'>=':return a>=b;case'AND':return truth(a)&&truth(b);case'OR':return truth(a)||truth(b)}}
+    function equal(a,b){return display(a).toUpperCase()===display(b).toUpperCase()}
+    function zeroReporter(c){switch(c){case'GETX':return turtle.x;case'GETY':return turtle.y;case'GETXY':return [turtle.x,turtle.y];case'HEADING':return norm(turtle.heading);case'PENCOLOR':return turtle.color;case'BACKGROUND':return background;case'WIDTH':return turtle.width;case'PEN':return turtle.mode.toUpperCase();case'PENDOWN?':return turtle.pen;case'SHOWN?':return turtle.visible;case'OPACITY':return turtle.opacity;case'SPEED':return turtle.speed;case'STEPSIZE':return 1;case'TURTLESIZE':return turtle.size;case'DATE':return new Date().toLocaleDateString();case'TIME':return new Date().toLocaleTimeString();case'MILLISECONDS':return Math.round(performance.now()-startedAt);case'COLORS':return Object.keys(COLORS).filter(x=>isNaN(Number(x)));case'BOUNDS':return[-width/2,-height/2,width/2,height/2]}}
+    function evalReporter(c,a,env){
+      const one=a[0],two=a[1];switch(c){
+        case'SUM':return num(one)+num(two);case'DIFFERENCE':return num(one)-num(two);case'PRODUCT':return num(one)*num(two);case'QUOTIENT':return num(one)/num(two);case'REMAINDER':case'MODULO':return num(one)%num(two);case'POWER':return Math.pow(num(one),num(two));case'RANDOM':return Math.floor(Math.random()*Math.max(0,num(one)));case'ABS':return Math.abs(num(one));case'INT':return Math.trunc(num(one));case'ROUND':return Math.round(num(one));case'SQRT':return Math.sqrt(num(one));case'MINUS':return-num(one);
+        case'SIN':return Math.sin(num(one)*Math.PI/180);case'COS':return Math.cos(num(one)*Math.PI/180);case'TAN':return Math.tan(num(one)*Math.PI/180);case'ARCSIN':return Math.asin(num(one))*180/Math.PI;case'ARCCOS':return Math.acos(num(one))*180/Math.PI;case'ARCTAN':return Math.atan(num(one))*180/Math.PI;case'RADSIN':return Math.sin(num(one));case'RADCOS':return Math.cos(num(one));case'RADARCTAN':return Math.atan(num(one));case'LOG':return Math.log(num(one));case'LOG10':return Math.log10(num(one));case'EXPN':return Math.exp(num(one));
+        case'AND':return truth(one)&&truth(two);case'OR':return truth(one)||truth(two);case'NOT':return!truth(one);case'LOGAND':return num(one)&num(two);case'LOGOR':return num(one)|num(two);case'LOGXOR':return num(one)^num(two);case'LOGNOT':return~num(one);case'LSH':return num(one)<<num(two);case'LSHIFT':return num(one)>>>num(two);
+        case'FIRST':{const d=asData(one);return typeof d==='string'?d.charAt(0):d[0]}case'LAST':{const d=asData(one);return typeof d==='string'?d.slice(-1):d[d.length-1]}case'BUTFIRST':{const d=asData(one);return typeof d==='string'?d.slice(1):d.slice(1)}case'BUTLAST':{const d=asData(one);return typeof d==='string'?d.slice(0,-1):d.slice(0,-1)}case'COUNT':return asData(one).length;case'ITEM':{const d=asData(two);return d[Math.max(0,num(one)-1)]}case'PICK':{const d=asData(one);return d[Math.floor(Math.random()*d.length)]}case'EMPTY?':return asData(one).length===0;case'MEMBER?':return asData(two).some(x=>equal(x,one));case'NUMBER?':return Number.isFinite(Number(one));case'WORD?':return typeof one==='string';case'LIST?':return one instanceof LogoList||Array.isArray(one);case'NAME?':return!!env.find(String(one));case'DEFINED?':return procedures.has(canon(one));
+        case'FPUT':return[one,...asData(two)];case'LPUT':return[...asData(two),one];case'LIST':return[one,two];case'SENTENCE':return[...asData(one),...asData(two)];case'WORD':return String(one)+String(two);case'BUTMEMBER':return asData(two).filter(x=>!equal(x,one));case'FROMMEMBER':{const d=asData(two),i=d.findIndex(x=>equal(x,one));return i<0?[]:d.slice(i)}case'LOWERCASE':return String(one).toLowerCase();case'UPPERCASE':return String(one).toUpperCase();case'MIXEDCASE':return String(one).toLowerCase().replace(/\b\w/g,x=>x.toUpperCase());case'REVERSE':return typeof one==='string'?[...one].reverse().join(''):asData(one).reverse();case'ISEQ':{const r=[];for(let i=num(one);i<=num(two);i++)r.push(i);return r}case'RSEQ':{const n=Math.max(2,Math.trunc(num(a[2]))),r=[];for(let i=0;i<n;i++)r.push(num(one)+(num(two)-num(one))*i/(n-1));return r}
+        case'THING':return env.get(String(one));case'QUOTE':return one;case'CHAR':return String.fromCodePoint(num(one));case'UNICODE':return String(one).codePointAt(0);case'TOWARDS':return towards(one);case'DISTANCE':{const [x,y]=pair(one);return Math.hypot(x-turtle.x,y-turtle.y)}case'COLOR':return colorOf(one);case'COLORNAME':return Object.keys(COLORS).find(k=>COLORS[k]===colorOf(one))||colorOf(one);case'FORM':return num(one).toFixed(Math.max(0,num(two)))}
+      throw new Error('I can’t report '+c+' yet.');
+    }
+    function asData(v){if(v instanceof LogoList)return dataFromList(v,null);if(Array.isArray(v))return v;if(typeof v==='string')return[...v];return[v]}
+    function pair(v){const d=asData(v).map(Number);if(d.length<2||d.some(x=>!Number.isFinite(x)))throw new Error('I expected a position like [40 80].');return[d[0],d[1]]}
+    function norm(n){return((n%360)+360)%360}
+    function towards(v){const[x,y]=pair(v);return norm(Math.atan2(x-turtle.x,y-turtle.y)*180/Math.PI)}
+
+    async function executeTokens(tokens,env,token=runToken){
+      const s={i:0};while(s.i<tokens.length){
+        check(token);if(++stepCount>20000)throw new Error('This program ran more than 20,000 steps. Check for a loop that never ends.');
+        let raw=tokens[s.i++];if(raw===']'||raw===')')continue;if(raw==='('){continue}let c=canon(raw);
+        if(c==='REPEAT'){const total=Math.max(0,Math.trunc(num(await evalExpr(tokens,s,env,0,token)))),list=takeList(tokens,s);for(let i=1;i<=total;i++){const child=new Env(env);child.repcount=i;child.reptotal=total;try{await executeTokens(list.tokens,child,token)}catch(e){if(e instanceof StopSignal)break;throw e}}}
+        else if(c==='IF'||c==='IFELSE'){const cond=truth(await evalExpr(tokens,s,env,0,token)),yes=takeList(tokens,s);let no=null;if(c==='IFELSE'||tokens[s.i]==='[')no=takeList(tokens,s);if(cond)await executeTokens(yes.tokens,new Env(env),token);else if(no)await executeTokens(no.tokens,new Env(env),token)}
+        else if(c==='TEST'){env.test=truth(await evalExpr(tokens,s,env,0,token))}
+        else if(c==='IFTRUE'||c==='IFFALSE'){const list=takeList(tokens,s);if((c==='IFTRUE')===!!env.test)await executeTokens(list.tokens,new Env(env),token)}
+        else if(c==='RUN'){const list=await evalExpr(tokens,s,env,0,token);await executeTokens(runTokens(list),new Env(env),token)}
+        else if(c==='FOR'){const spec=dataFromList(takeList(tokens,s),env),body=takeList(tokens,s);if(spec.length<3)throw new Error('FOR needs [NAME START END] and a command list.');const name=String(spec[0]),start=num(resolveData(spec[1],env)),end=num(resolveData(spec[2],env)),step=spec.length>3?num(resolveData(spec[3],env)):(start<=end?1:-1);if(step===0)throw new Error('FOR step cannot be zero.');for(let v=start;step>0?v<=end:v>=end;v+=step){const child=new Env(env);child.values.set(name.toUpperCase(),v);await executeTokens(body.tokens,child,token)}}
+        else if(c==='FOREACH'){const values=dataFromList(takeList(tokens,s),env).map(v=>resolveData(v,env)),body=takeList(tokens,s);for(const v of values){const child=new Env(env);child.values.set('?',v);await executeTokens(body.tokens,child,token)}}
+        else if(['WHILE','UNTIL'].includes(c)){const cond=takeList(tokens,s),body=takeList(tokens,s);let guard=0;while((c==='WHILE')===truth(await evalRunlist(cond,env,token))){if(++guard>5000)throw new Error(c+' ran too many times.');await executeTokens(body.tokens,new Env(env),token);check(token)}}
+        else if(c==='DO.WHILE'||c==='DO.UNTIL'){const body=takeList(tokens,s),cond=takeList(tokens,s);let guard=0;do{await executeTokens(body.tokens,new Env(env),token);if(++guard>5000)throw new Error(c+' ran too many times.')}while((c==='DO.WHILE')===truth(await evalRunlist(cond,env,token)))}
+        else if(c==='WAIT'){await waitMs(clamp(num(await evalExpr(tokens,s,env,0,token)),0,10000),token)}
+        else if(c==='STOP')throw new StopSignal();
+        else if(c==='OUTPUT'){throw new OutputSignal(await evalExpr(tokens,s,env,0,token))}
+        else if(c==='MAKE'||c==='LMAKE'||c==='NAME'){let name,val;if(c==='NAME'){val=await evalExpr(tokens,s,env,0,token);name=await evalExpr(tokens,s,env,0,token)}else{name=await evalExpr(tokens,s,env,0,token);val=await evalExpr(tokens,s,env,0,token)}env.set(String(name),val,c==='LMAKE')}
+        else if(c==='LOCAL'){const name=await evalExpr(tokens,s,env,0,token);for(const n of asData(name))env.values.set(String(n).toUpperCase(),undefined)}
+        else if(['PRINT','SHOW','TYPE','PRINTQUOTE'].includes(c)){const v=await evalExpr(tokens,s,env,0,token);writeOutput(display(v,c==='SHOW'),c==='TYPE')}
+        else if(c==='CLEARTEXT'){clearOutput()}
+        else if(c==='SAY'){const v=await evalExpr(tokens,s,env,0,token);writeOutput(display(v));speak(display(v))}
+        else if(['FORWARD','BACK','RIGHT','LEFT','SETHEADING','SETX','SETY','SETXY','SETP','PSETHEADING','ARC','DOT','STAMPOVAL','STAMPRECT','TURTLETEXT','SETPC','SETBG','SETWIDTH','SETOPACITY','SETTURTLESIZE','SETSPEED','SETSTEPSIZE','SETFONT','SETSHADOW'].includes(c)){await graphicsCommand(c,tokens,s,env,token)}
+        else if(['PENUP','PENDOWN','PENERASE','PENREVERSE','HIDETURTLE','SHOWTURTLE','HOME','CLEARSCREEN','CLEAN','DRAW','FILL','GRIDON','GRIDOFF','WRAP','FENCE','WINDOW','SLOWTURTLE','STAMP'].includes(c)){await graphicsNoArg(c,token)}
+        else if(c==='IGNORE'){await evalExpr(tokens,s,env,0,token)}
+        else if(c==='RERANDOM'){Math.random()}
+        else if(c==='RESTART'){resetDrawing(true);globals=new Map();procedures.clear();clearOutput()}
+        else if(c==='BYE'||c==='TOPLEVEL'||c==='HALT'){throw new StopSignal()}
+        else if(procedures.has(c)){const p=procedures.get(c),args=[];for(let i=0;i<p.inputs.length;i++)args.push(await evalExpr(tokens,s,env,0,token));await callProcedure(p,args,env,token,false)}
+        else if(isReporterName(c)){const val=await evalAtom([raw,...tokens.slice(s.i)],{i:0},env,token);writeOutput(display(val)) ;break}
+        else throw new Error('I don’t know “'+raw+'”. Check the command guide.');
+      }
+    }
+    function isReporterName(c){return reporterArity[c]!=null||['PI','GETX','GETY','GETXY','HEADING','PENCOLOR','BACKGROUND','WIDTH','PEN','PENDOWN?','SHOWN?','OPACITY','SPEED','STEPSIZE','TURTLESIZE','DATE','TIME','MILLISECONDS','COLORS','BOUNDS'].includes(c)}
+    async function callProcedure(p,args,parent,token,wantsOutput){
+      if(++callDepth>150){callDepth--;throw new Error('The procedure called itself too many times. Check its STOP or IF rule.')}const env=new Env(parent);p.inputs.forEach((n,i)=>env.values.set(n,args[i]));
+      try{await executeTokens(p.tokens,env,token)}catch(e){callDepth--;if(e instanceof OutputSignal)return e.value;if(e instanceof StopSignal)return undefined;throw e}callDepth--;if(wantsOutput)throw new Error(p.name+' did not OUTPUT a value.');
+    }
+    function runTokens(v){if(v instanceof LogoList)return v.tokens;if(Array.isArray(v))return v.map(String);return lex(String(v))}
+    async function evalRunlist(list,env,token){const st={i:0};return evalExpr(list.tokens,st,env,0,token)}
+    function resolveData(v,env){if(typeof v==='string'&&v.startsWith(':'))return env.get(v.slice(1));return v}
+
+    async function graphicsCommand(c,tokens,s,env,token){
+      if(c==='FORWARD'||c==='BACK'){const d=num(await evalExpr(tokens,s,env,0,token))*(c==='BACK'?-1:1);await moveBy(d,token);return}
+      if(c==='RIGHT'||c==='LEFT'){turtle.heading=norm(turtle.heading+num(await evalExpr(tokens,s,env,0,token))*(c==='RIGHT'?1:-1));markDirty();await paintTick();return}
+      if(c==='SETHEADING'||c==='PSETHEADING'){turtle.heading=norm(num(await evalExpr(tokens,s,env,0,token)));markDirty();await paintTick();return}
+      if(c==='SETX'||c==='SETY'){const v=num(await evalExpr(tokens,s,env,0,token));await moveTo(c==='SETX'?v:turtle.x,c==='SETY'?v:turtle.y,token);return}
+      if(c==='SETXY'){const v=await evalExpr(tokens,s,env,0,token),[x,y]=pair(v);await moveTo(x,y,token);return}
+      if(c==='SETP'){const v=pair(await evalExpr(tokens,s,env,0,token)),r=num(v[0]),a=num(v[1])*Math.PI/180;await moveTo(Math.sin(a)*r,Math.cos(a)*r,token);return}
+      if(c==='SETPC'){finishStroke();turtle.color=colorOf(await evalExpr(tokens,s,env,0,token));markDirty();return}
+      if(c==='SETBG'){background=colorOf(await evalExpr(tokens,s,env,0,token));markDirty();return}
+      if(c==='SETWIDTH'){finishStroke();turtle.width=clamp(num(await evalExpr(tokens,s,env,0,token)),.2,100);markDirty();return}
+      if(c==='SETOPACITY'){finishStroke();let v=num(await evalExpr(tokens,s,env,0,token));turtle.opacity=clamp(v>1?v/100:v,0,1);markDirty();return}
+      if(c==='SETTURTLESIZE'){turtle.size=clamp(num(await evalExpr(tokens,s,env,0,token)),.2,8);markDirty();return}
+      if(c==='SETSPEED'){turtle.speed=clamp(num(await evalExpr(tokens,s,env,0,token)),0,10);return}
+      if(c==='SETSTEPSIZE'){await evalExpr(tokens,s,env,0,token);return}
+      if(c==='SETFONT'){turtle.font=String(await evalExpr(tokens,s,env,0,token));return}
+      if(c==='SETSHADOW'){await evalExpr(tokens,s,env,0,token);return}
+      if(c==='DOT'){const size=clamp(num(await evalExpr(tokens,s,env,0,token)),1,200);finishStroke();scene.push({kind:'dot',x:turtle.x,y:turtle.y,size,color:turtle.color,alpha:turtle.opacity});markDirty();return}
+      if(c==='ARC'){const angle=num(await evalExpr(tokens,s,env,0,token)),radius=Math.abs(num(await evalExpr(tokens,s,env,0,token)));finishStroke();const pts=[],steps=Math.max(8,Math.ceil(Math.abs(angle)/4));for(let i=0;i<=steps;i++){const a=(turtle.heading-90+(angle*i/steps))*Math.PI/180;pts.push({x:turtle.x+Math.cos(a)*radius,y:turtle.y+Math.sin(a)*radius})}scene.push({kind:'path',points:pts,color:turtle.mode==='erase'?background:turtle.color,width:turtle.width,alpha:turtle.opacity});markDirty();await paintTick();return}
+      if(c==='STAMPOVAL'||c==='STAMPRECT'){const w=num(await evalExpr(tokens,s,env,0,token)),h=num(await evalExpr(tokens,s,env,0,token));let filled=false;if(tokens[s.i]!==')'&&s.i<tokens.length){const look=canon(tokens[s.i]);if(look==='TRUE'||tokens[s.i].startsWith('"'))filled=truth(await evalExpr(tokens,s,env,0,token))}scene.push({kind:c==='STAMPOVAL'?'oval':'rect',x:turtle.x,y:turtle.y,w,h,color:turtle.color,width:turtle.width,alpha:turtle.opacity,filled});markDirty();return}
+      if(c==='TURTLETEXT'){const v=await evalExpr(tokens,s,env,0,token);finishStroke();scene.push({kind:'text',x:turtle.x,y:turtle.y,text:display(v),color:turtle.color,alpha:turtle.opacity,font:turtle.font,heading:turtle.heading});markDirty();return}
+    }
+    async function graphicsNoArg(c,token){
+      if(c==='PENUP'){finishStroke();turtle.pen=false}else if(c==='PENDOWN'){turtle.pen=true;turtle.mode='paint'}else if(c==='PENERASE'){finishStroke();turtle.pen=true;turtle.mode='erase'}else if(c==='PENREVERSE'){finishStroke();turtle.pen=true;turtle.mode='reverse'}else if(c==='HIDETURTLE')turtle.visible=false;else if(c==='SHOWTURTLE')turtle.visible=true;
+      else if(c==='HOME'){await moveTo(0,0,token);turtle.heading=0}else if(c==='CLEARSCREEN'){finishStroke();scene=[];turtle.x=0;turtle.y=0;turtle.heading=0}else if(c==='CLEAN'){finishStroke();scene=[]}else if(c==='DRAW'){resetDrawing(true)}
+      else if(c==='FILL'){finishStroke();const last=[...scene].reverse().find(x=>x.kind==='path'&&x.points.length>2);if(last)scene.push({kind:'fill',points:last.points,color:turtle.color,alpha:turtle.opacity});else scene.push({kind:'dot',x:turtle.x,y:turtle.y,size:12,color:turtle.color,alpha:turtle.opacity})}
+      else if(c==='GRIDON')gridVisible=true;else if(c==='GRIDOFF')gridVisible=false;else if(c==='WRAP')boundaryMode='wrap';else if(c==='FENCE')boundaryMode='fence';else if(c==='WINDOW')boundaryMode='window';else if(c==='SLOWTURTLE')turtle.speed=.35;else if(c==='STAMP')scene.push({kind:'turtle',x:turtle.x,y:turtle.y,heading:turtle.heading,color:turtle.color,size:turtle.size});markDirty();await paintTick();
+    }
+
+    function strokePoint(x,y){if(!turtle.pen)return;if(!currentStroke)currentStroke={kind:'path',points:[{x:turtle.x,y:turtle.y}],color:turtle.mode==='erase'?background:turtle.color,width:turtle.width,alpha:turtle.opacity,reverse:turtle.mode==='reverse'};currentStroke.points.push({x,y})}
+    function finishStroke(){if(currentStroke&&currentStroke.points.length>1)scene.push(currentStroke);currentStroke=null}
+    async function moveBy(distance,token){const a=turtle.heading*Math.PI/180;await moveTo(turtle.x+Math.sin(a)*distance,turtle.y+Math.cos(a)*distance,token)}
+    async function moveTo(x,y,token){
+      check(token);if(boundaryMode==='fence'){x=clamp(x,-width/2,width/2);y=clamp(y,-height/2,height/2)}else if(boundaryMode==='wrap'){if(x>width/2)x=-width/2;if(x<-width/2)x=width/2;if(y>height/2)y=-height/2;if(y<-height/2)y=height/2}
+      const sx=turtle.x,sy=turtle.y,dist=Math.hypot(x-sx,y-sy);if(dist===0)return;const duration=turtle.speed<=0?0:clamp(dist*0.65/Math.max(.12,turtle.speed),18,360);
+      if(duration===0){strokePoint(x,y);turtle.x=x;turtle.y=y;markDirty();return}
+      await new Promise(resolve=>{tween={sx,sy,tx:x,ty:y,start:0,duration,token,resolve,lastX:sx,lastY:sy};markDirty()});
+    }
+    function waitMs(ms,token){return new Promise(resolve=>{const start=performance.now();const tick=()=>{if(token!==runToken||performance.now()-start>=ms)resolve();else setTimeout(tick,Math.min(50,ms))};tick()})}
+    function check(token){if(token!==runToken)throw new StopSignal()}
+
+    function markDirty(){dirty=true;if(!framePending){framePending=true;requestAnimationFrame(frame)}}
+    function paintTick(){return new Promise(resolve=>{frameWaiters.push(resolve);markDirty()})}
+    function frame(now){
+      framePending=false;
+      if(tween){if(tween.token!==runToken){const r=tween.resolve;tween=null;r()}else{if(!tween.start)tween.start=now;const p=clamp((now-tween.start)/tween.duration,0,1),ease=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2,nx=tween.sx+(tween.tx-tween.sx)*ease,ny=tween.sy+(tween.ty-tween.sy)*ease;strokePoint(nx,ny);turtle.x=nx;turtle.y=ny;dirty=true;if(p>=1){turtle.x=tween.tx;turtle.y=tween.ty;const r=tween.resolve;tween=null;r()}}}
+      if(dirty){render();dirty=false}const waits=frameWaiters.splice(0);waits.forEach(r=>r());if(tween||dirty||frameWaiters.length)markDirty()
+    }
+
+    function render(){
+      ctx.setTransform(dpr,0,0,dpr,0,0);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.fillStyle=background;ctx.fillRect(0,0,width,height);
+      if(gridVisible){ctx.strokeStyle=background==='#fffaf0'?'#e9e1cf':'rgba(100,116,139,.22)';ctx.lineWidth=1;ctx.beginPath();for(let x=(width/2)%32;x<width;x+=32){ctx.moveTo(x,0);ctx.lineTo(x,height)}for(let y=(height/2)%32;y<height;y+=32){ctx.moveTo(0,y);ctx.lineTo(width,y)}ctx.stroke()}
+      for(const item of scene)drawItem(item);if(currentStroke)drawItem(currentStroke);if(turtle.visible)drawTurtle(turtle.x,turtle.y,turtle.heading,turtle.color,turtle.size)
+    }
+    function sx(x){return width/2+x}function sy(y){return height/2-y}
+    function drawItem(o){ctx.save();ctx.globalAlpha=o.alpha??1;ctx.strokeStyle=o.color||turtle.color;ctx.fillStyle=o.color||turtle.color;ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=o.width||2;if(o.reverse)ctx.globalCompositeOperation='difference';
+      if(o.kind==='path'){if(o.points.length>1){ctx.beginPath();ctx.moveTo(sx(o.points[0].x),sy(o.points[0].y));for(let i=1;i<o.points.length;i++)ctx.lineTo(sx(o.points[i].x),sy(o.points[i].y));ctx.stroke()}}
+      else if(o.kind==='fill'){ctx.beginPath();ctx.moveTo(sx(o.points[0].x),sy(o.points[0].y));for(let i=1;i<o.points.length;i++)ctx.lineTo(sx(o.points[i].x),sy(o.points[i].y));ctx.closePath();ctx.fill()}
+      else if(o.kind==='dot'){ctx.beginPath();ctx.arc(sx(o.x),sy(o.y),o.size/2,0,Math.PI*2);ctx.fill()}
+      else if(o.kind==='oval'){ctx.beginPath();ctx.ellipse(sx(o.x)+o.w/2,sy(o.y)-o.h/2,Math.abs(o.w/2),Math.abs(o.h/2),0,0,Math.PI*2);o.filled?ctx.fill():ctx.stroke()}
+      else if(o.kind==='rect'){o.filled?ctx.fillRect(sx(o.x),sy(o.y)-o.h,o.w,o.h):ctx.strokeRect(sx(o.x),sy(o.y)-o.h,o.w,o.h)}
+      else if(o.kind==='text'){ctx.translate(sx(o.x),sy(o.y));ctx.rotate(o.heading*Math.PI/180);ctx.font=o.font||'700 18px sans-serif';ctx.textBaseline='alphabetic';ctx.fillText(o.text,0,0)}
+      else if(o.kind==='turtle')drawTurtle(o.x,o.y,o.heading,o.color,o.size);ctx.restore()}
+    function drawTurtle(x,y,heading,color,size=1){ctx.save();ctx.translate(sx(x),sy(y));ctx.rotate(heading*Math.PI/180);ctx.scale(size,size);ctx.fillStyle=color||'#0c8f73';ctx.strokeStyle='#075b4b';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,13,17,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.beginPath();ctx.arc(0,-17,7,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#ffd75a';ctx.beginPath();ctx.arc(-3,-19,1.3,0,Math.PI*2);ctx.arc(3,-19,1.3,0,Math.PI*2);ctx.fill();ctx.fillStyle=color||'#0c8f73';for(const [px,py] of [[-12,-9],[12,-9],[-12,10],[12,10]]){ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fill();ctx.stroke()}ctx.restore()}
+
+    function resizeCanvas(){const rect=canvas.getBoundingClientRect(),nw=Math.round(rect.width),nh=Math.round(rect.height),nd=Math.min(devicePixelRatio||1,2);if(!nw||!nh||(nw===width&&nh===height&&nd===dpr))return;const oldW=width||nw,oldH=height||nh,rx=nw/oldW,ry=nh/oldH;width=nw;height=nh;dpr=nd;canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);if(oldW&&oldH&&(rx!==1||ry!==1)){for(const o of scene){if(o.points)o.points.forEach(p=>{p.x*=rx;p.y*=ry});if('x'in o)o.x*=rx;if('y'in o)o.y*=ry}turtle.x*=rx;turtle.y*=ry;if(currentStroke)currentStroke.points.forEach(p=>{p.x*=rx;p.y*=ry})}markDirty()}
+    function resetDrawing(full=false){runToken++;if(tween){const r=tween.resolve;tween=null;r()}scene=[];currentStroke=null;turtle=freshTurtle();boundaryMode='window';gridVisible=true;if(full)background='#fffaf0';markDirty()}
+    function writeOutput(text,inline=false){if(outputEl.textContent==='PRINT and SHOW results appear here.')outputEl.textContent='';outputEl.textContent+=text+(inline?'':'\n');outputEl.scrollTop=outputEl.scrollHeight}
+    function clearOutput(){outputEl.textContent=''}
+    function speak(text){if('speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(text))}}
+    function setStatus(msg,error=false){statusEl.textContent=msg;statusEl.classList.toggle('error',error)}
+
+    async function runCode(){
+      runToken++;if(tween){const r=tween.resolve;tween=null;r()}finishStroke();const token=runToken;callDepth=0;stepCount=0;clearOutput();
+      try{const tokens=extractProcedures(code.value);if(!tokens.length&&procedures.size===0)throw new Error('Type a command first — try FD 100.');setStatus('Running…');await executeTokens(tokens,globalEnv(),token);finishStroke();markDirty();if(token===runToken)setStatus('Nice work! Your turtle finished the program.')}
+      catch(e){if(e instanceof StopSignal){if(token===runToken)setStatus('Stopped. You can change the program and try again.')}else{setStatus(e.message||String(e),true);console.error(e)}}
+    }
+    function showLesson(index){lessonIndex=index;const l=lessons[index];document.getElementById('stepCount').textContent='Practice '+(index+1)+' of '+lessons.length;document.getElementById('lessonTitle').textContent=l.title;document.getElementById('lessonGoal').textContent=l.goal;document.getElementById('lessonHint').innerHTML='<strong>Hint:</strong> '+l.hint;document.getElementById('dots').innerHTML=lessons.map((_,i)=>'<span class="dot '+(i===index?'on':'')+'"></span>').join('');document.getElementById('prevLesson').disabled=index===0;document.getElementById('nextLesson').textContent=index===lessons.length-1?'Start over ↻':'Next →';code.value=l.code;resetDrawing();clearOutput();setStatus('Ready when you are!')}
+
+    document.getElementById('run').addEventListener('click',runCode);
+    document.getElementById('stop').addEventListener('click',()=>{runToken++;if(tween){const r=tween.resolve;tween=null;r()}finishStroke();markDirty();setStatus('Stopped. You can change the program and try again.')});
+    document.getElementById('clear').addEventListener('click',()=>{resetDrawing();setStatus('Canvas cleared. Ready for a new drawing!')});
+    document.getElementById('clearOutput').addEventListener('click',clearOutput);
+    document.getElementById('prevLesson').addEventListener('click',()=>showLesson(Math.max(0,lessonIndex-1)));
+    document.getElementById('nextLesson').addEventListener('click',()=>showLesson(lessonIndex===lessons.length-1?0:lessonIndex+1));
+    code.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runCode()}else if(e.key==='Tab'){e.preventDefault();const a=code.selectionStart,b=code.selectionEnd;code.setRangeText('  ',a,b,'end')}});
+    new ResizeObserver(()=>resizeCanvas()).observe(canvas);resizeCanvas();showLesson(0);
+  try{if(location.hash==='#windmill'){var wi=lessons.findIndex(function(l){return /windmill/i.test(l.title)});if(wi>0)showLesson(wi);}}catch(e){}
+  })();
+  </script>
+</body>
+</html>
