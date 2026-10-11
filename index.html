@@ -20,7 +20,7 @@
     .intro{display:flex;align-items:end;justify-content:space-between;gap:24px;margin:4px 0 20px}
     h1{font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;font-size:clamp(2rem,4vw,3.25rem);line-height:.98;letter-spacing:-.035em;margin:0;max-width:620px}
     .intro p{margin:0;max-width:480px;color:var(--muted);font-size:1.05rem;line-height:1.45}
-    .workspace{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(310px,.75fr);gap:18px;align-items:start}
+    .workspace{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(330px,.88fr);gap:18px;align-items:start}
     .card{background:var(--panel);box-shadow:var(--shadow);border:1px solid rgba(23,50,77,.08)}
     .stage-card{padding:12px;border-radius:26px;contain:layout paint}
     .stage-wrap{position:relative;overflow:hidden;border-radius:18px;background:#fffaf0;min-height:430px;contain:paint}
@@ -33,7 +33,9 @@
     .hint{margin:12px 0 0;background:var(--sky);padding:10px 12px;border-radius:12px;color:#285367;font-size:.94rem;line-height:1.35}
     .code-card{border-radius:22px;overflow:hidden}.code-head{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-bottom:1px solid var(--line);gap:10px}
     .code-head strong{font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif}.tiny{color:var(--muted);font-size:.84rem}
-    textarea{display:block;width:100%;height:246px;border:0;resize:vertical;padding:16px;background:#132d40;color:#f5fbff;font:700 1rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;outline:none;tab-size:2}
+    .editor{display:flex;align-items:stretch;background:#132d40}
+    .gutter{padding:16px 8px 16px 14px;min-width:46px;text-align:right;color:#61809a;font:700 1.06rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre;overflow:hidden;user-select:none;border-right:1px solid rgba(255,255,255,.07)}
+    textarea{flex:1;display:block;min-width:0;height:340px;border:0;resize:vertical;padding:16px 16px 16px 10px;background:transparent;color:#f5fbff;font:700 1.06rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;outline:none;tab-size:2}
     textarea:focus{box-shadow:inset 0 0 0 3px var(--yellow)}
     .actions{padding:12px;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:9px}.btn{border:0;border-radius:13px;padding:12px 14px;min-height:48px;font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;font-weight:900;cursor:pointer;transition:transform .12s,background .12s}
     .btn:active{transform:translateY(1px)}.run{background:var(--green);color:#fff}.run:hover{background:var(--green-dark)}.stop{background:#ffe6df;color:#9b3f2d}.clear{background:#edf3f5;color:var(--ink)}
@@ -83,7 +85,7 @@
         <section class="card code-card">
           <div class="code-head"><strong>Your program</strong><span class="tiny"><span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to run</span></div>
           <label for="code" class="tiny" style="position:absolute;left:-9999px">Logo program</label>
-          <textarea id="code" aria-label="Logo program" spellcheck="false" autocapitalize="off"></textarea>
+          <div class="editor"><div class="gutter" id="gutter" aria-hidden="true">1</div><textarea id="code" aria-label="Logo program" spellcheck="false" autocapitalize="off"></textarea></div>
           <div class="actions"><button class="btn run" id="run">▶ Run</button><button class="btn stop" id="stop">■ Stop</button><button class="btn clear" id="clear">↺ Clear</button></div>
           <p class="status" id="status" role="status">Ready when you are!</p>
           <div class="output-wrap"><div class="output-head"><span>Logo output</span><button id="clearOutput" type="button">Clear output</button></div><pre class="output" id="output" aria-live="polite">PRINT and SHOW results appear here.</pre></div>
@@ -96,11 +98,11 @@
           <div class="group-title">Move and draw</div>
           <div class="command"><code>FD 100 · BK 50</code><span>FORWARD / BACK. Move in turtle steps.</span></div>
           <div class="command"><code>RT 90 · LT 90</code><span>RIGHT / LEFT. Turn in degrees.</span></div>
-          <div class="command"><code>SETXY [40 80]</code><span>Also SETX, SETY, SETH / SETHEADING, HOME.</span></div>
+          <div class="command"><code>SETXY [40 80]</code><span>Also SETX, SETY, SETH / SETHEADING, HOME. SETPOS is SETXY by its classic name.</span></div>
           <div class="command"><code>PU · PD · HT · ST</code><span>PENUP, PENDOWN, HIDETURTLE, SHOWTURTLE.</span></div>
-          <div class="command"><code>SETPC "BLUE</code><span>Set pen color by Logo color number, name, or [R G B].</span></div>
-          <div class="command"><code>SETWIDTH 5</code><span>Also SETW, SETBG, SETOPACITY, PENERASE, PENREVERSE.</span></div>
-          <div class="command"><code>ARC 180 60</code><span>Draw an arc. DOT, FILL, STAMPOVAL, STAMPRECT and TURTLETEXT also work.</span></div>
+          <div class="command"><code>SETPC "BLUE</code><span>Set pen color by Logo color number, name, or [R G B]. The long names SETPENCOLOR and SETPENCOLOUR work too.</span></div>
+          <div class="command"><code>SETWIDTH 5</code><span>Also SETW, SETPENSIZE, SETBG / SETBACKGROUND, SETOPACITY, PENERASE, PENREVERSE, PENPAINT.</span></div>
+          <div class="command"><code>ARC 180 60</code><span>Draw an arc. CIRCLE 50 draws a full circle around the turtle. DOT, FILL, STAMPOVAL, STAMPRECT and TURTLETEXT (or LABEL) also work.</span></div>
           <div class="command"><code>CS · CLEAN · DRAW</code><span>Clear and home, clear only, or reset the whole drawing.</span></div>
 
           <div class="group-title">Repeat, decide, and wait</div>
@@ -120,9 +122,9 @@
           <div class="group-title">Words, lists, math, and logic</div>
           <div class="command"><code>FIRST · LAST · ITEM</code><span>Access data. Also BF / BUTFIRST, BL / BUTLAST, COUNT and PICK.</span></div>
           <div class="command"><code>LIST · SE · WORD</code><span>Build data. Also FPUT, LPUT, SENTENCE, ISEQ, RSEQ, REVERSE and REMOVE.</span></div>
-          <div class="command"><code>SUM · DIFFERENCE</code><span>Also PRODUCT, QUOTIENT, REMAINDER, MODULO, POWER, SQRT, ABS, INT and ROUND.</span></div>
+          <div class="command"><code>SUM · DIFFERENCE</code><span>Also PRODUCT, QUOTIENT, REMAINDER, MODULO, POWER, SQRT, ABS, INT, ROUND, MIN and MAX.</span></div>
           <div class="command"><code>SIN · COS · TAN · PI</code><span>Degree trig plus ASIN, ACOS, ATAN, radians, logs, and random numbers.</span></div>
-          <div class="command"><code>= · &lt;&gt; · &lt; · &gt; · &lt;= · &gt;=</code><span>Comparisons; AND, OR and NOT combine true/false values.</span></div>
+          <div class="command"><code>= · &lt;&gt; · &lt; · &gt; · &lt;= · &gt;=</code><span>Comparisons; EQUAL?, LESS? and GREATER? ask them as reporters. AND, OR and NOT combine true/false values.</span></div>
           <div class="command"><code>EMPTY? · MEMBER? · NUMBER?</code><span>Also WORD?, LIST?, NAME?, DEFINED? and PENDOWN?.</span></div>
 
           <div class="group-title">Position reports and browser-safe I/O</div>
@@ -141,6 +143,7 @@
     'use strict';
     const canvas=document.getElementById('stage'),ctx=canvas.getContext('2d',{alpha:false});
     const code=document.getElementById('code'),statusEl=document.getElementById('status'),outputEl=document.getElementById('output');
+    const gutter=document.getElementById('gutter');
     let width=0,height=0,dpr=1,runToken=0,callDepth=0,stepCount=0,lessonIndex=0;
     let scene=[],currentStroke=null,background='#fffaf0',gridVisible=true,boundaryMode='window';
     let framePending=false,dirty=true,tween=null,frameWaiters=[];
@@ -156,6 +159,10 @@
       {title:'Mission 7: Recursive spiral',goal:'A procedure can call itself with a smaller input.',hint:'STOP ends the procedure when the size gets too small.',code:'TO SPIRAL :SIZE\n  IF :SIZE < 5 [ STOP ]\n  FD :SIZE\n  RT 91\n  SPIRAL :SIZE - 2\nEND\n\nSPIRAL 110'},
       {title:'Mission 8: Ferris wheel',goal:'Build a Ferris wheel from reusable RIM, CABIN, and WHEEL procedures.',hint:'WHEEL calls CABIN once at the end of each spoke.',code:'TO RIM :R\n  REPEAT 72 [ FD PI * :R / 36 LT 5 ]\nEND\n\nTO CABIN :S\n  REPEAT 4 [ FD :S RT 90 ]\nEND\n\nTO WHEEL :R :SPOKES\n  PU SETY 0 - :R SETH 90 PD\n  RIM :R\n  PU HOME SETH 0 PD\n  REPEAT :SPOKES [\n    FD :R\n    CABIN 18\n    BK :R\n    RT 360 / :SPOKES\n  ]\nEND\n\nSETPC "TEAL\nSETWIDTH 3\nWHEEL 105 12'},
       {title:'Mission 9: Windmill',goal:'Build a windmill: a stand, a round hub, and 4 blades. Each blade has a thin rectangular handle from the hub, a rectangle sail, and grid lines inside the sail. Teach the turtle a new trick called BLADE, then use it 4 times.',hint:'RT 45 aims the turtle at the first corner. Each RT 90 spins it to the next blade.',code:'CS\nPU BK 46 PD\nBK 90\nRT 90 FD 70 BK 140 FD 70\nPU HOME\nRT 90 BK 46 LT 90\nPD\nREPEAT 36 [ FD 8 RT 10 ]\nPU RT 90 FD 46 LT 90 PD\nTO BLADE\n  REPEAT 2 [ FD 50 RT 90 FD 10 RT 90 ]\n  PU FD 50 PD\n  REPEAT 2 [ FD 70 RT 90 FD 40 RT 90 ]\n  REPEAT 6 [ FD 10 RT 90 FD 40 BK 40 LT 90 ]\n  FD 10\n  REPEAT 3 [ RT 90 FD 10 LT 90 BK 70 FD 70 ]\n  PU LT 90 FD 30 RT 90 BK 120 PD\nEND\nRT 45\nBLADE RT 90 BLADE RT 90 BLADE RT 90 BLADE'},
+      {title:'Challenge 1: Koch snowflake edge',goal:'Draw one edge of a snowflake: every straight line is replaced by a smaller zigzag, three levels deep, until the line looks frosty and bumpy.',hint:'KOCH calls itself with LVL one smaller. When LVL reaches 0 it just steps forward.',code:'TO KOCH :LEN :LVL\n  IF :LVL = 0 [ FD :LEN STOP ]\n  KOCH :LEN / 3 :LVL - 1\n  LT 60\n  KOCH :LEN / 3 :LVL - 1\n  RT 120\n  KOCH :LEN / 3 :LVL - 1\n  LT 60\n  KOCH :LEN / 3 :LVL - 1\nEND\n\nPU SETXY [-150 -30] SETH 90 PD\nSETPC "TEAL\nKOCH 300 3'},
+      {title:'Challenge 2: Fractal tree',goal:'Grow a tree that splits into two smaller branches at every fork, seven forks deep. Thick brown trunk, thin green tips.',hint:'TREE draws one branch, then calls itself twice: once turned right, once turned left.',code:'TO TREE :LEN :LVL\n  IF :LVL = 0 [ STOP ]\n  IF :LVL = 1 [ SETPC "GREEN ]\n  SETWIDTH MAX 1 :LVL / 2\n  FD :LEN\n  RT 24\n  TREE :LEN * 0.7 :LVL - 1\n  LT 48\n  TREE :LEN * 0.7 :LVL - 1\n  RT 24\n  BK :LEN\nEND\n\nPU SETY -160 PD\nSETPC "BROWN\nTREE 80 7'},
+      {title:'Challenge 3: Polygon parade',goal:'Draw a parade of shapes — triangle, square, pentagon, all the way to a nine-sided nonagon — each in a surprise color, marching across the canvas.',hint:'TURN is a reporter: it uses OUTPUT to hand back 360 / :N, and POLY spends that answer.',code:'TO TURN :N\n  OUTPUT 360 / :N\nEND\n\nTO POLY :N :S\n  REPEAT :N [ FD :S RT TURN :N ]\nEND\n\nFOR [N 3 9] [\n  SETPC PICK [RED ORANGE GOLD GREEN TEAL BLUE PURPLE]\n  POLY :N 42\n  PU RT 40 FD 55 LT 40 PD\n]'},
+      {title:'Challenge 4: Starfield and moon',goal:'Fill a night sky with 80 twinkling stars in random places, then hang a golden crescent moon in the corner.',hint:'RANDOM picks the star spots. The crescent is two filled circles: a gold one, then a night-colored bite taken out of it.',code:'CS\nSETBG "NAVY\nREPEAT 80 [\n  PU\n  SETX RANDOM 640 - 320\n  SETY RANDOM 420 - 210\n  PD\n  SETPC PICK ["WHITE "YELLOW "AQUA "GOLD]\n  DOT 2 + RANDOM 5\n]\nPU SETXY [190 130] PD\nSETPC "GOLD\nARC 360 36\nFILL\nSETPC "NAVY\nPU SETXY [204 142] PD\nARC 360 30\nFILL'},
       {title:'Bonus: Write on the canvas',goal:'Place colorful text beside a stamped shape.',hint:'TURTLETEXT draws a word or list without moving the turtle.',code:'SETPC "GREEN\n(STAMPOVAL 90 90 "TRUE)\nPU SETXY [-70 -80] PD\nSETPC "NAVY\nTURTLETEXT [GREAT WORK VED!]'}
     ];
 
@@ -163,14 +170,14 @@
       0:'#000000',1:'#0057b8',2:'#16a34a',3:'#00a7a7',4:'#dc2626',5:'#a855f7',6:'#a16207',7:'#d1d5db',8:'#6b7280',9:'#60a5fa',10:'#22c55e',11:'#22d3ee',12:'#fb7185',13:'#e879f9',14:'#facc15',15:'#ffffff',
       BLACK:'#000000',BLUE:'#2563eb',GREEN:'#159947',CYAN:'#06b6d4',RED:'#dc2626',MAGENTA:'#c026d3',BROWN:'#92400e',GRAY:'#6b7280',GREY:'#6b7280',LIGHTBLUE:'#60a5fa',LIME:'#84cc16',AQUA:'#22d3ee',CORAL:'#f26f55',PURPLE:'#8b5cf6',YELLOW:'#facc15',WHITE:'#ffffff',ORANGE:'#f97316',PINK:'#ec4899',TEAL:'#0d9488',NAVY:'#17324d',SILVER:'#94a3b8',GOLD:'#eab308'
     };
-    const ALIAS={FD:'FORWARD',BK:'BACK',RT:'RIGHT',LT:'LEFT',PU:'PENUP',PD:'PENDOWN',HT:'HIDETURTLE',ST:'SHOWTURTLE',CS:'CLEARSCREEN',SETH:'SETHEADING',SETW:'SETWIDTH',SETXY:'SETXY',POS:'GETXY',XCOR:'GETX',YCOR:'GETY',BG:'BACKGROUND',PC:'PENCOLOR',PR:'PRINT',OP:'OUTPUT',IFT:'IFTRUE',IFF:'IFFALSE',BF:'BUTFIRST',BL:'BUTLAST',BM:'BUTMEMBER',REMOVE:'BUTMEMBER',FM:'FROMMEMBER',SE:'SENTENCE',EMPTYP:'EMPTY?',MEMBERP:'MEMBER?',NUMBERP:'NUMBER?',WORDP:'WORD?',LISTP:'LIST?',NAMEP:'NAME?',DEFINEDP:'DEFINED?',PENDOWNP:'PENDOWN?',SHOWNP:'SHOWN?',ARRAYP:'ARRAY?',ACOS:'ARCCOS',ASIN:'ARCSIN',ATAN:'ARCTAN',LN:'LOG',EXP:'EXPN',LOCALMAKE:'LMAKE',SETPC:'SETPC',TT:'TURTLETEXT'};
+    const ALIAS={FD:'FORWARD',BK:'BACK',RT:'RIGHT',LT:'LEFT',PU:'PENUP',PD:'PENDOWN',HT:'HIDETURTLE',ST:'SHOWTURTLE',CS:'CLEARSCREEN',SETH:'SETHEADING',SETW:'SETWIDTH',SETXY:'SETXY',POS:'GETXY',XCOR:'GETX',YCOR:'GETY',BG:'BACKGROUND',PC:'PENCOLOR',PR:'PRINT',OP:'OUTPUT',IFT:'IFTRUE',IFF:'IFFALSE',BF:'BUTFIRST',BL:'BUTLAST',BM:'BUTMEMBER',REMOVE:'BUTMEMBER',FM:'FROMMEMBER',SE:'SENTENCE',EMPTYP:'EMPTY?',MEMBERP:'MEMBER?',NUMBERP:'NUMBER?',WORDP:'WORD?',LISTP:'LIST?',NAMEP:'NAME?',DEFINEDP:'DEFINED?',PENDOWNP:'PENDOWN?',SHOWNP:'SHOWN?',ARRAYP:'ARRAY?',ACOS:'ARCCOS',ASIN:'ARCSIN',ATAN:'ARCTAN',LN:'LOG',EXP:'EXPN',LOCALMAKE:'LMAKE',SETPC:'SETPC',TT:'TURTLETEXT',SETPENCOLOR:'SETPC',SETPENCOLOUR:'SETPC',SETBACKGROUND:'SETBG',SETPENSIZE:'SETWIDTH',SETPENWIDTH:'SETWIDTH',SETPOS:'SETXY',LABEL:'TURTLETEXT'};
     const reporterArity={
       SUM:2,DIFFERENCE:2,PRODUCT:2,QUOTIENT:2,REMAINDER:2,MODULO:2,POWER:2,RANDOM:1,ABS:1,INT:1,ROUND:1,SQRT:1,MINUS:1,
       SIN:1,COS:1,TAN:1,ARCSIN:1,ARCCOS:1,ARCTAN:1,RADSIN:1,RADCOS:1,RADARCTAN:1,LOG:1,LOG10:1,EXPN:1,
       AND:2,OR:2,NOT:1,LOGAND:2,LOGOR:2,LOGXOR:2,LOGNOT:1,LSH:2,LSHIFT:2,
       FIRST:1,LAST:1,BUTFIRST:1,BUTLAST:1,COUNT:1,ITEM:2,PICK:1,'EMPTY?':1,'MEMBER?':2,'NUMBER?':1,'WORD?':1,'LIST?':1,'NAME?':1,'DEFINED?':1,
       FPUT:2,LPUT:2,LIST:2,SENTENCE:2,WORD:2,BUTMEMBER:2,FROMMEMBER:2,LOWERCASE:1,UPPERCASE:1,MIXEDCASE:1,REVERSE:1,ISEQ:2,RSEQ:3,THING:1,QUOTE:1,CHAR:1,UNICODE:1,
-      TOWARDS:1,DISTANCE:1,COLOR:1,COLORNAME:1,FORM:2
+      TOWARDS:1,DISTANCE:1,COLOR:1,COLORNAME:1,FORM:2,MIN:2,MAX:2,'EQUAL?':2,'LESS?':2,'GREATER?':2
     };
 
     class Env{
@@ -213,7 +220,7 @@
     }
     function dataFromList(list,env){
       const t=list instanceof LogoList?list.tokens:list;const out=[];
-      for(let i=0;i<t.length;i++){const x=t[i];if(x==='['){let d=1,j=i+1;for(;j<t.length&&d;j++){if(t[j]==='[')d++;if(t[j]===']')d--}out.push(dataFromList(new LogoList(t.slice(i+1,j-1)),env));i=j-1}else if(/^[-+]?\d*\.?\d+(e[-+]?\d+)?$/i.test(x))out.push(Number(x));else if(x.startsWith(':')&&env){try{out.push(env.get(x.slice(1)))}catch{out.push(x)}}else out.push(x.replace(/^"/,''))}
+      for(let i=0;i<t.length;i++){const x=t[i];if((x==='-'||x==='+')&&i+1<t.length&&/^\d*\.?\d+(e[-+]?\d+)?$/i.test(t[i+1])){out.push((x==='-'?-1:1)*Number(t[i+1]));i++;continue}if(x==='['){let d=1,j=i+1;for(;j<t.length&&d;j++){if(t[j]==='[')d++;if(t[j]===']')d--}out.push(dataFromList(new LogoList(t.slice(i+1,j-1)),env));i=j-1}else if(/^[-+]?\d*\.?\d+(e[-+]?\d+)?$/i.test(x))out.push(Number(x));else if(x.startsWith(':')&&env){try{out.push(env.get(x.slice(1)))}catch{out.push(x)}}else out.push(x.replace(/^"/,''))}
       return out
     }
 
@@ -248,7 +255,7 @@
         case'AND':return truth(one)&&truth(two);case'OR':return truth(one)||truth(two);case'NOT':return!truth(one);case'LOGAND':return num(one)&num(two);case'LOGOR':return num(one)|num(two);case'LOGXOR':return num(one)^num(two);case'LOGNOT':return~num(one);case'LSH':return num(one)<<num(two);case'LSHIFT':return num(one)>>>num(two);
         case'FIRST':{const d=asData(one);return typeof d==='string'?d.charAt(0):d[0]}case'LAST':{const d=asData(one);return typeof d==='string'?d.slice(-1):d[d.length-1]}case'BUTFIRST':{const d=asData(one);return typeof d==='string'?d.slice(1):d.slice(1)}case'BUTLAST':{const d=asData(one);return typeof d==='string'?d.slice(0,-1):d.slice(0,-1)}case'COUNT':return asData(one).length;case'ITEM':{const d=asData(two);return d[Math.max(0,num(one)-1)]}case'PICK':{const d=asData(one);return d[Math.floor(Math.random()*d.length)]}case'EMPTY?':return asData(one).length===0;case'MEMBER?':return asData(two).some(x=>equal(x,one));case'NUMBER?':return Number.isFinite(Number(one));case'WORD?':return typeof one==='string';case'LIST?':return one instanceof LogoList||Array.isArray(one);case'NAME?':return!!env.find(String(one));case'DEFINED?':return procedures.has(canon(one));
         case'FPUT':return[one,...asData(two)];case'LPUT':return[...asData(two),one];case'LIST':return[one,two];case'SENTENCE':return[...asData(one),...asData(two)];case'WORD':return String(one)+String(two);case'BUTMEMBER':return asData(two).filter(x=>!equal(x,one));case'FROMMEMBER':{const d=asData(two),i=d.findIndex(x=>equal(x,one));return i<0?[]:d.slice(i)}case'LOWERCASE':return String(one).toLowerCase();case'UPPERCASE':return String(one).toUpperCase();case'MIXEDCASE':return String(one).toLowerCase().replace(/\b\w/g,x=>x.toUpperCase());case'REVERSE':return typeof one==='string'?[...one].reverse().join(''):asData(one).reverse();case'ISEQ':{const r=[];for(let i=num(one);i<=num(two);i++)r.push(i);return r}case'RSEQ':{const n=Math.max(2,Math.trunc(num(a[2]))),r=[];for(let i=0;i<n;i++)r.push(num(one)+(num(two)-num(one))*i/(n-1));return r}
-        case'THING':return env.get(String(one));case'QUOTE':return one;case'CHAR':return String.fromCodePoint(num(one));case'UNICODE':return String(one).codePointAt(0);case'TOWARDS':return towards(one);case'DISTANCE':{const [x,y]=pair(one);return Math.hypot(x-turtle.x,y-turtle.y)}case'COLOR':return colorOf(one);case'COLORNAME':return Object.keys(COLORS).find(k=>COLORS[k]===colorOf(one))||colorOf(one);case'FORM':return num(one).toFixed(Math.max(0,num(two)))}
+        case'THING':return env.get(String(one));case'QUOTE':return one;case'CHAR':return String.fromCodePoint(num(one));case'UNICODE':return String(one).codePointAt(0);case'TOWARDS':return towards(one);case'DISTANCE':{const [x,y]=pair(one);return Math.hypot(x-turtle.x,y-turtle.y)}case'COLOR':return colorOf(one);case'COLORNAME':return Object.keys(COLORS).find(k=>COLORS[k]===colorOf(one))||colorOf(one);case'FORM':return num(one).toFixed(Math.max(0,num(two)));case'MIN':return Math.min(num(one),num(two));case'MAX':return Math.max(num(one),num(two));case'EQUAL?':return equal(one,two);case'LESS?':return num(one)<num(two);case'GREATER?':return num(one)>num(two)}
       throw new Error('I can’t report '+c+' yet.');
     }
     function asData(v){if(v instanceof LogoList)return dataFromList(v,null);if(Array.isArray(v))return v;if(typeof v==='string')return[...v];return[v]}
@@ -277,8 +284,8 @@
         else if(['PRINT','SHOW','TYPE','PRINTQUOTE'].includes(c)){const v=await evalExpr(tokens,s,env,0,token);writeOutput(display(v,c==='SHOW'),c==='TYPE')}
         else if(c==='CLEARTEXT'){clearOutput()}
         else if(c==='SAY'){const v=await evalExpr(tokens,s,env,0,token);writeOutput(display(v));speak(display(v))}
-        else if(['FORWARD','BACK','RIGHT','LEFT','SETHEADING','SETX','SETY','SETXY','SETP','PSETHEADING','ARC','DOT','STAMPOVAL','STAMPRECT','TURTLETEXT','SETPC','SETBG','SETWIDTH','SETOPACITY','SETTURTLESIZE','SETSPEED','SETSTEPSIZE','SETFONT','SETSHADOW'].includes(c)){await graphicsCommand(c,tokens,s,env,token)}
-        else if(['PENUP','PENDOWN','PENERASE','PENREVERSE','HIDETURTLE','SHOWTURTLE','HOME','CLEARSCREEN','CLEAN','DRAW','FILL','GRIDON','GRIDOFF','WRAP','FENCE','WINDOW','SLOWTURTLE','STAMP'].includes(c)){await graphicsNoArg(c,token)}
+        else if(['FORWARD','BACK','RIGHT','LEFT','SETHEADING','SETX','SETY','SETXY','SETP','PSETHEADING','ARC','DOT','STAMPOVAL','STAMPRECT','TURTLETEXT','SETPC','SETBG','SETWIDTH','SETOPACITY','SETTURTLESIZE','SETSPEED','SETSTEPSIZE','SETFONT','SETSHADOW','CIRCLE'].includes(c)){await graphicsCommand(c,tokens,s,env,token)}
+        else if(['PENUP','PENDOWN','PENERASE','PENREVERSE','HIDETURTLE','SHOWTURTLE','HOME','CLEARSCREEN','CLEAN','DRAW','FILL','GRIDON','GRIDOFF','WRAP','FENCE','WINDOW','SLOWTURTLE','STAMP','PENPAINT','PENNORMAL'].includes(c)){await graphicsNoArg(c,token)}
         else if(c==='IGNORE'){await evalExpr(tokens,s,env,0,token)}
         else if(c==='RERANDOM'){Math.random()}
         else if(c==='RESTART'){resetDrawing(true);globals=new Map();procedures.clear();clearOutput()}
@@ -313,13 +320,14 @@
       if(c==='SETSTEPSIZE'){await evalExpr(tokens,s,env,0,token);return}
       if(c==='SETFONT'){turtle.font=String(await evalExpr(tokens,s,env,0,token));return}
       if(c==='SETSHADOW'){await evalExpr(tokens,s,env,0,token);return}
+      if(c==='CIRCLE'){const r=Math.abs(num(await evalExpr(tokens,s,env,0,token)));finishStroke();const pts=[];for(let i=0;i<=72;i++){const a=i/72*Math.PI*2;pts.push({x:turtle.x+Math.sin(a)*r,y:turtle.y+Math.cos(a)*r})}scene.push({kind:'path',points:pts,color:turtle.mode==='erase'?background:turtle.color,width:turtle.width,alpha:turtle.opacity});markDirty();await paintTick();return}
       if(c==='DOT'){const size=clamp(num(await evalExpr(tokens,s,env,0,token)),1,200);finishStroke();scene.push({kind:'dot',x:turtle.x,y:turtle.y,size,color:turtle.color,alpha:turtle.opacity});markDirty();return}
       if(c==='ARC'){const angle=num(await evalExpr(tokens,s,env,0,token)),radius=Math.abs(num(await evalExpr(tokens,s,env,0,token)));finishStroke();const pts=[],steps=Math.max(8,Math.ceil(Math.abs(angle)/4));for(let i=0;i<=steps;i++){const a=(turtle.heading-90+(angle*i/steps))*Math.PI/180;pts.push({x:turtle.x+Math.cos(a)*radius,y:turtle.y+Math.sin(a)*radius})}scene.push({kind:'path',points:pts,color:turtle.mode==='erase'?background:turtle.color,width:turtle.width,alpha:turtle.opacity});markDirty();await paintTick();return}
       if(c==='STAMPOVAL'||c==='STAMPRECT'){const w=num(await evalExpr(tokens,s,env,0,token)),h=num(await evalExpr(tokens,s,env,0,token));let filled=false;if(tokens[s.i]!==')'&&s.i<tokens.length){const look=canon(tokens[s.i]);if(look==='TRUE'||tokens[s.i].startsWith('"'))filled=truth(await evalExpr(tokens,s,env,0,token))}scene.push({kind:c==='STAMPOVAL'?'oval':'rect',x:turtle.x,y:turtle.y,w,h,color:turtle.color,width:turtle.width,alpha:turtle.opacity,filled});markDirty();return}
       if(c==='TURTLETEXT'){const v=await evalExpr(tokens,s,env,0,token);finishStroke();scene.push({kind:'text',x:turtle.x,y:turtle.y,text:display(v),color:turtle.color,alpha:turtle.opacity,font:turtle.font,heading:turtle.heading});markDirty();return}
     }
     async function graphicsNoArg(c,token){
-      if(c==='PENUP'){finishStroke();turtle.pen=false}else if(c==='PENDOWN'){turtle.pen=true;turtle.mode='paint'}else if(c==='PENERASE'){finishStroke();turtle.pen=true;turtle.mode='erase'}else if(c==='PENREVERSE'){finishStroke();turtle.pen=true;turtle.mode='reverse'}else if(c==='HIDETURTLE')turtle.visible=false;else if(c==='SHOWTURTLE')turtle.visible=true;
+      if(c==='PENUP'){finishStroke();turtle.pen=false}else if(c==='PENDOWN'||c==='PENPAINT'||c==='PENNORMAL'){turtle.pen=true;turtle.mode='paint'}else if(c==='PENERASE'){finishStroke();turtle.pen=true;turtle.mode='erase'}else if(c==='PENREVERSE'){finishStroke();turtle.pen=true;turtle.mode='reverse'}else if(c==='HIDETURTLE')turtle.visible=false;else if(c==='SHOWTURTLE')turtle.visible=true;
       else if(c==='HOME'){await moveTo(0,0,token);turtle.heading=0}else if(c==='CLEARSCREEN'){finishStroke();scene=[];turtle.x=0;turtle.y=0;turtle.heading=0}else if(c==='CLEAN'){finishStroke();scene=[]}else if(c==='DRAW'){resetDrawing(true)}
       else if(c==='FILL'){finishStroke();const last=[...scene].reverse().find(x=>x.kind==='path'&&x.points.length>2);if(last)scene.push({kind:'fill',points:last.points,color:turtle.color,alpha:turtle.opacity});else scene.push({kind:'dot',x:turtle.x,y:turtle.y,size:12,color:turtle.color,alpha:turtle.opacity})}
       else if(c==='GRIDON')gridVisible=true;else if(c==='GRIDOFF')gridVisible=false;else if(c==='WRAP')boundaryMode='wrap';else if(c==='FENCE')boundaryMode='fence';else if(c==='WINDOW')boundaryMode='window';else if(c==='SLOWTURTLE')turtle.speed=.35;else if(c==='STAMP')scene.push({kind:'turtle',x:turtle.x,y:turtle.y,heading:turtle.heading,color:turtle.color,size:turtle.size});markDirty();await paintTick();
@@ -368,12 +376,13 @@
     function speak(text){if('speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(text))}}
     function setStatus(msg,error=false){statusEl.textContent=msg;statusEl.classList.toggle('error',error)}
 
+    function updateGutter(){const n=(code.value.match(/\n/g)||[]).length+1;let s='';for(let i=1;i<=n;i++)s+=i+(i<n?'\n':'');gutter.textContent=s;gutter.scrollTop=code.scrollTop}
     async function runCode(){
       runToken++;if(tween){const r=tween.resolve;tween=null;r()}finishStroke();const token=runToken;callDepth=0;stepCount=0;clearOutput();
       try{const tokens=extractProcedures(code.value);if(!tokens.length&&procedures.size===0)throw new Error('Type a command first — try FD 100.');setStatus('Running…');await executeTokens(tokens,globalEnv(),token);finishStroke();markDirty();if(token===runToken)setStatus('Nice work! Your turtle finished the program.')}
       catch(e){if(e instanceof StopSignal){if(token===runToken)setStatus('Stopped. You can change the program and try again.')}else{setStatus(e.message||String(e),true);console.error(e)}}
     }
-    function showLesson(index){lessonIndex=index;const l=lessons[index];document.getElementById('stepCount').textContent='Practice '+(index+1)+' of '+lessons.length;document.getElementById('lessonTitle').textContent=l.title;document.getElementById('lessonGoal').textContent=l.goal;document.getElementById('lessonHint').innerHTML='<strong>Hint:</strong> '+l.hint;document.getElementById('dots').innerHTML=lessons.map((_,i)=>'<span class="dot '+(i===index?'on':'')+'"></span>').join('');document.getElementById('prevLesson').disabled=index===0;document.getElementById('nextLesson').textContent=index===lessons.length-1?'Start over ↻':'Next →';code.value=l.code;resetDrawing();clearOutput();setStatus('Ready when you are!')}
+    function showLesson(index){lessonIndex=index;const l=lessons[index];document.getElementById('stepCount').textContent='Practice '+(index+1)+' of '+lessons.length;document.getElementById('lessonTitle').textContent=l.title;document.getElementById('lessonGoal').textContent=l.goal;document.getElementById('lessonHint').innerHTML='<strong>Hint:</strong> '+l.hint;document.getElementById('dots').innerHTML=lessons.map((_,i)=>'<span class="dot '+(i===index?'on':'')+'"></span>').join('');document.getElementById('prevLesson').disabled=index===0;document.getElementById('nextLesson').textContent=index===lessons.length-1?'Start over ↻':'Next →';code.value=l.code;updateGutter();resetDrawing();clearOutput();setStatus('Ready when you are!')}
 
     document.getElementById('run').addEventListener('click',runCode);
     document.getElementById('stop').addEventListener('click',()=>{runToken++;if(tween){const r=tween.resolve;tween=null;r()}finishStroke();markDirty();setStatus('Stopped. You can change the program and try again.')});
@@ -381,7 +390,9 @@
     document.getElementById('clearOutput').addEventListener('click',clearOutput);
     document.getElementById('prevLesson').addEventListener('click',()=>showLesson(Math.max(0,lessonIndex-1)));
     document.getElementById('nextLesson').addEventListener('click',()=>showLesson(lessonIndex===lessons.length-1?0:lessonIndex+1));
-    code.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runCode()}else if(e.key==='Tab'){e.preventDefault();const a=code.selectionStart,b=code.selectionEnd;code.setRangeText('  ',a,b,'end')}});
+    code.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runCode()}else if(e.key==='Tab'){e.preventDefault();const a=code.selectionStart,b=code.selectionEnd;code.setRangeText('  ',a,b,'end')}else if(e.key==='['||e.key==='('){e.preventDefault();const a=code.selectionStart,b=code.selectionEnd,sel=code.value.slice(a,b),close=e.key==='['?']':')';code.setRangeText(e.key+sel+close,a,b,'end');code.setSelectionRange(a+1,a+1+sel.length);updateGutter()}else if((e.key===']'||e.key===')')&&code.selectionStart===code.selectionEnd&&code.value[code.selectionStart]===e.key){e.preventDefault();code.setSelectionRange(code.selectionStart+1,code.selectionStart+1)}else if(e.key==='Enter'){e.preventDefault();const a=code.selectionStart,ls=code.value.lastIndexOf('\n',a-1)+1,line=code.value.slice(ls,a),indent=(line.match(/^\s*/)||[''])[0],extra=line.trimEnd().endsWith('[')?'  ':'';code.setRangeText('\n'+indent+extra,a,code.selectionEnd,'end');updateGutter()}});
+    code.addEventListener('input',updateGutter);
+    code.addEventListener('scroll',()=>{gutter.scrollTop=code.scrollTop});
     new ResizeObserver(()=>resizeCanvas()).observe(canvas);resizeCanvas();showLesson(0);
   try{if(location.hash==='#windmill'){var wi=lessons.findIndex(function(l){return /windmill/i.test(l.title)});if(wi>0)showLesson(wi);}}catch(e){}
   })();
